@@ -1,7 +1,7 @@
 # inv-kin-sim
 Inverse kinematic appendage simulation
 
-Testing inverse kinematic control algorithms where each leg knowing, its origin, destination, and length, can change the angle between jointed arms to bring its tip to the destination. After that we copy Boston Dynamics and then profit.
+Testing inverse kinematic control algorithms where each leg, knowing its origin, destination, and length, can change the angle between jointed arms to bring its tip to the destination. After that we copy Boston Dynamics and then profit.
     
 This simulation can do everything a regular quadraped can do, such as: 
 * Standing:   

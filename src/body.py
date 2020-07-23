@@ -17,7 +17,6 @@ class Body():
         self.corners = np.array([(o[0] + w / 2, o[1] + l / 2, o[2] + h), (o[0] + w / 2, o[1] - l / 2, o[2] + h),
                                  (o[0] - w / 2, o[1] - l / 2, o[2] + h), (o[0] - w / 2, o[1] + l / 2, o[2] + h)])
 
-        #TODO: find a better way to set foot destinations and eventually walk
         self.legs = [Arm3D(4, 4, (self.corners[0][0], self.corners[0][1], self.corners[0][2] - h), self.corners[0]),
                      Arm3D(4, 4, (self.corners[1][0], self.corners[1][1], self.corners[1][2] - h), self.corners[1]),
                      Arm3D(4, 4, (self.corners[2][0], self.corners[2][1], self.corners[2][2] - h), self.corners[2]),

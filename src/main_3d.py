@@ -13,10 +13,11 @@ sp = mp.Axes3D(fig)
 
 # sp.set_aspect('equal')
 
-sp.plot((-15, 15), (0, 0), (0, 0), c="#999999")
-sp.plot((0, 0), (-15, 15), (0, 0), c="#999999")
-sp.plot((0, 0), (0, 0), (-15, 15), c="#999999")
-sp.text(15, 0, 0, 'x'), sp.text(0, 15, 0, "y"), sp.text(0, 0, 15, "z")
+sp.plot((-9, 9), (0, 0), (0, 0), c="#999999")
+sp.plot((0, 0), (-9, 9), (0, 0), c="#999999")
+sp.plot((0, 0), (0, 0), (0, 15), c="#999999")
+sp.text(9, 0, 0, 'x'), sp.text(0, 9, 0, "y"), sp.text(0, 0, 15, "z")
+
 
 #
 # def set_destination():
@@ -38,8 +39,16 @@ sp.text(15, 0, 0, 'x'), sp.text(0, 15, 0, "y"), sp.text(0, 0, 15, "z")
 
 # body, =   sp.plot(arm_calc.o, arm_calc_2.o)
 
-body = Body(8, 5, 5)
+body = Body(5, 8, 5)
 body.graph(sp)
+
+del_x, del_y, del_z = [], [], []
+for x in np.linspace(0, 10*pi, 1000):
+    del_x += [cos(x) / 20]
+    del_y += [sin(x) / 20]
+    del_z += [sin(x) / 15]
+
+x, y, z = iter(del_x), iter(del_y), iter(del_z)
 
 while True:
     # if distance < 0.2:
@@ -63,9 +72,8 @@ while True:
 
     # Animate and rotate the body
     body.update(sp)
-    if(body.rotation[1] < pi / 6):
-
-        body.rotate(0, 0.01, 0)
+    # body.translate([next(x), next(y), next(z)])
+    body.rotate(0, 0.01, 0)
 
     draw()
     pause(0.01)

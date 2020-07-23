@@ -1,4 +1,5 @@
 from math import *
+import numpy as np
 
 # Model for a 2D kinematic arm. The 3D one is cooler go look at that instead
 class Arm:
@@ -86,7 +87,7 @@ class Arm:
 
 # model for a 3D kinematic arm with 1 DOF at its centre joint and 2 at its base
 class Arm3D:
-    def __init__(self, a_len, b_len, dest, origin=(0, 0, 0), angles=(0, pi, 0)):
+    def __init__(self, a_len, b_len, dest, origin=(0, 0, 0), angles=(pi, 0, 0)):
         self.a_l = a_len
         self.b_l = b_len
         self.dest = dest
@@ -97,11 +98,21 @@ class Arm3D:
         self.prev_gr = [0, 0, 0]
 
     # calculate distance between tip and destination, theta added to determine possible movements
-    def calc_dist(self, theta_a=0.0, theta_b=0.0, theta_c=0.0):
+    def get_tip(self):
+        tip = (self.a_l * sin(self.c) + self.b_l * sin(self.c) + self.o[0]), \
+              (self.a_l * cos(self.a) + self.b_l * cos(self.b) + self.o[1]), \
+              (self.a_l * sin(self.a) + self.b_l * (self.b) + self.o[2])
 
-        tip = (self.a_l * cos(self.a + theta_a) + self.b_l * cos(self.b + theta_b) + self.o[0]), \
-              (self.a_l * sin(self.a + theta_a) + self.b_l * sin(self.b + theta_b) + self.o[1]), \
-              (self.a_l * sin(self.c + theta_c) + self.b_l * sin(self.c + theta_c) + self.o[2])
+        return tip
+
+    # calculate distance between tip and destination, theta added to determine possible movements
+    def calc_dist(self, theta_a=0.0, theta_b=0.0, theta_c=0.0):
+        # tip = (self.a_l * cos(self.a + theta_a) + self.b_l * cos(self.b + theta_b) + self.o[0]), \
+        #       (self.a_l * sin(self.a + theta_a) + self.b_l * sin(self.b + theta_b) + self.o[1]), \
+        #       (self.a_l * sin(self.c + theta_c) + self.b_l * sin(self.c + theta_c) + self.o[2])
+        tip = (self.a_l * sin(self.c + theta_c) + self.b_l * sin(self.c + theta_c) + self.o[0]), \
+              (self.a_l * cos(self.a + theta_a) + self.b_l * cos(self.b + theta_b) + self.o[1]), \
+              (self.a_l * sin(self.a + theta_a) + self.b_l * (self.b + theta_b) + self.o[2])
         distance = sqrt((tip[0] - self.dest[0]) ** 2 + (tip[1] - self.dest[1]) ** 2 + (tip[2] - self.dest[2]) ** 2)
 
         return distance
@@ -113,16 +124,24 @@ class Arm3D:
                      self.calc_dist(0, theta, 0) - self.calc_dist(0, -theta, 0),
                      self.calc_dist(0, 0, theta) - self.calc_dist(0, 0, -theta)]
 
-        speed = [0, 0, 0]
+        #   This version is faster but more unstable
+        # for i in range(len(gradients)):
+        #     # if the gradients are opposite signs (past destination), slow it down towards the opposite direction & reset
+        #     if abs(gradients[i]) + abs(self.prev_gr[i]) > abs(gradients[i] + self.prev_gr[i]) and not isclose(gradients[i], self.prev_gr[i]):
+        #         angle[i] -=  self.speed[i] * (self.prev_gr[i] / (gradients[i] - self.prev_gr[i]))
+        #         self.speed[i] = 0
+        #     else:
+        #         self.speed[i] += gradients[i]
+        #     angle[i] -= self.speed[i]
 
         for i in range(len(gradients)):
             # if the gradients are opposite signs (past destination), slow it down towards the opposite direction & reset
-            if abs(gradients[i]) + abs(self.prev_gr[i]) > abs(gradients[i] + self.prev_gr[i]) and not isclose(gradients[i], self.prev_gr[i]):
-                angle[i] -= speed[i] * (self.prev_gr[i] / (gradients[i] - self.prev_gr[i]))
-                speed[i] = 0
-            else:
-                speed[i] += gradients[i]
-            angle[i] -= speed[i]
+            # if abs(gradients[i]) + abs(self.prev_gr[i]) > abs(gradients[i] + self.prev_gr[i]) and not isclose(gradients[i], self.prev_gr[i]):
+            angle[i] -= gradients[i] * (-1 if np.sign(gradients[i]) != np.sign(self.prev_gr[i]) and not isclose(gradients[i], self.prev_gr[i]) else 1)
+
+            # if an angle gets caught in a singularity, nudge it out
+
+        # angle[2] -= 0.01 if isclose(gradients[1], 0) and not isclose(self.get_tip()[1], self.dest[1]) else 0
 
         self.prev_gr = gradients
 
@@ -142,12 +161,14 @@ class Arm3D:
     def update(self, arm):
 
         self.a, self.b, self.c = self.find_angle([self.a, self.b, self.c], 0.25 / ((self.a_l + self.b_l) / 2) if self.distance < 1
-                                                 else 1 / ((self.a_l + self.b_l) / 2))  # slow down if the tip is too close
+                                                 else 2 / ((self.a_l + self.b_l) / 2))  # slow down if the tip is too close
         self.distance = self.calc_dist()
 
         # determine the location of the central joint and tip of the arm
-        joint = (self.a_l * cos(self.a) + self.o[0]), (self.a_l * sin(self.a) + self.o[1]), (self.a_l * sin(self.c) + self.o[2])
-        tip = (self.b_l * cos(self.b) + joint[0]), (self.b_l * sin(self.b) + joint[1]), (self.b_l * sin(self.c) + joint[2])
+        # joint = (self.a_l * cos(self.a) + self.o[0]), (self.a_l * sin(self.a) + self.o[1]), (self.a_l * sin(self.c) + self.o[2])
+        # tip = (self.b_l * cos(self.b) + joint[0]), (self.b_l * sin(self.b) + joint[1]), (self.b_l * sin(self.c) + joint[2])
+        joint = (self.a_l * sin(self.c) + self.o[0]), (self.a_l * cos(self.a) + self.o[1]), (self.a_l * sin(self.a) + self.o[2])
+        tip = (self.b_l * sin(self.c) + joint[0]), (self.b_l * cos(self.b) + joint[1]), (self.b_l * sin(self.b) + joint[2])
 
         arm1, arm2, joint_a, joint_b = arm
         joint_a.set_xdata([self.o[0]])
