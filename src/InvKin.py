@@ -101,7 +101,7 @@ class Arm3D:
     def get_tip(self):
         tip = (self.a_l * sin(self.c) + self.b_l * sin(self.c) + self.o[0]), \
               (self.a_l * cos(self.a) + self.b_l * cos(self.b) + self.o[1]), \
-              (self.a_l * sin(self.a) + self.b_l * (self.b) + self.o[2])
+              (self.a_l * sin(self.a) + self.b_l * sin(self.b) + self.o[2])
 
         return tip
 
@@ -137,12 +137,14 @@ class Arm3D:
         for i in range(len(gradients)):
             # if the gradients are opposite signs (past destination), slow it down towards the opposite direction & reset
             # if abs(gradients[i]) + abs(self.prev_gr[i]) > abs(gradients[i] + self.prev_gr[i]) and not isclose(gradients[i], self.prev_gr[i]):
+            # if not isclose(gradients[0], 0, abs_tol=0.01):
             angle[i] -= gradients[i] * (-1 if np.sign(gradients[i]) != np.sign(self.prev_gr[i]) and not isclose(gradients[i], self.prev_gr[i]) else 1)
-
+            # angle[i] += 0.1 if isclose(gradients[i], 0, abs_tol=0.01) and not isclose(self.get_tip()[2], self.dest[2]) else 0
             # if an angle gets caught in a singularity, nudge it out
 
-        # angle[2] -= 0.01 if isclose(gradients[1], 0) and not isclose(self.get_tip()[1], self.dest[1]) else 0
-
+        # print(isclose(gradients[0], 0, abs_tol=0.1) and not isclose(self.get_tip()[2], self.dest[2]))
+        # angle[0] += 0.2 if isclose(gradients[0], 0, abs_tol=0.01) and not isclose(self.get_tip()[2], self.dest[2]) else 0
+        # angle[1] += 0.1 if isclose(gradients[1], 0, abs_tol=0.01) and not isclose(self.get_tip()[2], self.dest[2]) else 0
         self.prev_gr = gradients
 
         return angle

@@ -73,7 +73,8 @@ while True:
     # Animate and rotate the body
     body.update(sp)
     # body.translate([next(x), next(y), next(z)])
-    body.rotate(0, 0.01, 0)
+    body.rotate([0, 0.01, 0])
+    # body.legs[1].a += pi / 8 if body.rotation[0] < pi / 4 else 0
 
     draw()
     pause(0.01)
