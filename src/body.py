@@ -13,7 +13,6 @@ class Body():
         self.h = h
         self.o = o
 
-
         self.corners = np.array([(o[0] + w / 2, o[1] + l / 2, o[2] + h), (o[0] + w / 2, o[1] - l / 2, o[2] + h),
                                  (o[0] - w / 2, o[1] - l / 2, o[2] + h), (o[0] - w / 2, o[1] + l / 2, o[2] + h)])
 
@@ -44,9 +43,18 @@ class Body():
                         np.array([[cos(y), 0, sin(y)], [0, 1, 0], [-sin(y), 0, cos(y)]]), \
                         np.array([[cos(z), -sin(z), 0], [sin(z), cos(z), 0], [0, 0, 1]])
         r = np.matmul(r_1, np.matmul(r_2, r_3))
-        self.rotation = [a + b for a, b in zip([x, y, z], self.rotation)]
 
-        self.corners = np.matmul(self.corners, r)
+        self.rotation = [a + b for a, b in zip([x, y, z], self.rotation)]
+        new_corners = np.matmul(self.corners, r)
+
+        ind_delta, delta = [], []
+
+        for i in range(len(self.corners)):
+            ind_delta = [a-b for a, b in zip(new_corners[i], self.corners[i])]
+            delta += [ind_delta]
+        self.corners = new_corners
+        for i in range(len(self.legs)):
+            self.legs[i].set_transformation(delta[i])
 
     # initialize graph objects
     def graph(self, sp):
@@ -60,8 +68,7 @@ class Body():
         for i in range(len(self.legs)):
             # if not isclose(self.leg_dist[i], 0, abs_tol=0.05):
             self.legs[i].update(self.leg_graphs[i])
-            self.legs[i].o = self.corners[i]
-
+            # self.legs[i].o = self.corners[i]
         # this may be inefficient, but it also works
         sp.collections.pop()
         sp.add_collection3d(mp.art3d.Poly3DCollection([self.corners]), zs=self.corners[0][0])
