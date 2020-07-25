@@ -32,8 +32,9 @@ while True:
 
     # Animate and rotate the body
     body.update(sp)
-    body.translate([next(x), next(y), next(z)])
-    body.rotate([0, 0.005, 0])
+    # body.translate([next(x), next(y), next(z)])
+    body.rotate([0.005, 0, 0])
+    print(body.legs[2].o, body.legs[2].dest)
 
     draw()
     pause(0.01)

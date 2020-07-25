@@ -49,6 +49,7 @@ class Body():
         r = np.matmul(r_1, np.matmul(r_2, r_3))
 
         self.rotation = [a + b for a, b in zip([x, y, z], self.rotation)]
+        # self.corners = np.matmul(self.corners, r)
         for i in range(len(self.corners)):
             self.corners[i] = np.matmul(self.corners[i], r)
 
@@ -63,5 +64,6 @@ class Body():
     def update(self, sp):
         for i in range(len(self.legs)):
             self.legs[i].update(self.leg_graphs[i])
+            # self.legs[i].o = self.corners[i]
         sp.collections.pop()
         sp.add_collection3d(mp.art3d.Poly3DCollection([self.corners]), zs=self.corners[0][0])

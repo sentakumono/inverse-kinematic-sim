@@ -158,8 +158,8 @@ class Arm3D:
 
     # animate graph objects
     def update(self, arm):
-        self.a, self.b, self.c = self.find_angle([self.a, self.b, self.c], 0.3 / ((self.a_l + self.b_l) / 2) if self.distance < 0.5
-                                                 else 2 / ((self.a_l + self.b_l) / 2))  # slow down if the tip is too close
+        self.a, self.b, self.c = self.find_angle([self.a, self.b, self.c], 0.2 / ((self.a_l + self.b_l) / 2) if self.distance < 0.5
+                                                 else 2 / ((self.a_l + self.b_l) / 2))  # slow down if the tip is close
         self.distance = self.calc_dist()
 
         # determine the location of the central joint and tip of the arm
