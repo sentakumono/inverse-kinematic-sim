@@ -94,13 +94,11 @@ class Arm3D:
         self.o = origin
         self.distance = 1
 
-        self.t = [0, 0, 0]
-
         self.a, self.b, self.c = angles
         self.prev_gr = [0, 0, 0]
 
-    # calculate distance between tip and destination, theta added to determine possible movements
-    def get_tip(self):
+    # returns the location of the leg's tip
+    def get_tip(self) -> tuple:
         tip = (self.a_l * sin(self.c) + self.b_l * sin(self.c) + self.o[0]), \
               (self.a_l * cos(self.a) + self.b_l * cos(self.b) + self.o[1]), \
               (self.a_l * sin(self.a) + self.b_l * sin(self.b) + self.o[2])
@@ -108,7 +106,7 @@ class Arm3D:
         return tip
 
     # calculate distance between tip and destination, theta added to determine possible movements
-    def calc_dist(self, theta_a=0.0, theta_b=0.0, theta_c=0.0):
+    def calc_dist(self, theta_a=0.0, theta_b=0.0, theta_c=0.0) -> float:
         # tip = (self.a_l * cos(self.a + theta_a) + self.b_l * cos(self.b + theta_b) + self.o[0]), \
         #       (self.a_l * sin(self.a + theta_a) + self.b_l * sin(self.b + theta_b) + self.o[1]), \
         #       (self.a_l * sin(self.c + theta_c) + self.b_l * sin(self.c + theta_c) + self.o[2])
@@ -120,7 +118,7 @@ class Arm3D:
         return distance
 
     # find the change in angle that brings the tip of the arm closer to the destination
-    def find_angle(self, angle, theta=1.0):
+    def find_angle(self, angle, theta=1.0) -> list:
         theta = radians(theta)
         gradients = [self.calc_dist(theta, 0, 0) - self.calc_dist(-theta, 0, 0),
                      self.calc_dist(0, theta, 0) - self.calc_dist(0, -theta, 0),
@@ -136,30 +134,20 @@ class Arm3D:
         #         self.speed[i] += gradients[i]
         #     angle[i] -= self.speed[i]
 
+        # real python moment
         for i in range(len(gradients)):
             # if the gradients are opposite signs (past destination), slow it down towards the opposite direction & reset
-            # if abs(gradients[i]) + abs(self.prev_gr[i]) > abs(gradients[i] + self.prev_gr[i]) and not isclose(gradients[i], self.prev_gr[i]):
-            # if not isclose(gradients[0], 0, abs_tol=0.01):
             angle[i] -= gradients[i] * (-1 if np.sign(gradients[i]) != np.sign(self.prev_gr[i]) and not isclose(gradients[i], self.prev_gr[i]) else 1)
-            # angle[i] += 0.1 if isclose(gradients[i], 0, abs_tol=0.01) and not isclose(self.get_tip()[2], self.dest[2]) else 0
-            # if an angle gets caught in a singularity, nudge it out
 
-        # print(isclose(gradients[0], 0, abs_tol=0.1) and not isclose(self.get_tip()[2], self.dest[2]))
-        # angle[0] += 0.2 if isclose(gradients[0], 0, abs_tol=0.01) and not isclose(self.get_tip()[2], self.dest[2]) else 0
-        # angle[1] += 0.1 if isclose(gradients[1], 0, abs_tol=0.01) and not isclose(self.get_tip()[2], self.dest[2]) else 0
         self.prev_gr = gradients
-
         return angle
 
-    def set_transformation(self, t):
-        if self.t != t:
-            self.t = [a + b for a, b in zip(self.t, t)]
-            # print(self.t)
-            self.dest = [a - b for a, b in zip(self.dest, t)]
+    # def add_transformation(self, t):
+    #     self.t = [a + b for a, b in zip(self.t, t)]
+    #     self.dest = [a - b for a, b in zip(self.dest, t)]
 
     # initialize graph objects
-    def graph(self, sp):
-
+    def graph(self, sp) -> list:
         arm1, = sp.plot((self.o[0], sqrt(3 * self.a_l ** 2)), (self.o[1], 0), (self.o[2], 0), c="#999999")
         joint_a, = sp.plot([self.o[0]], [self.o[1]], [self.o[2]], marker="o", markersize=5, c="#555599")
         joint_b, = sp.plot([self.o[0]], [self.o[1]], [self.o[2]], marker="o", markersize=5, c="#555599")
@@ -177,18 +165,18 @@ class Arm3D:
         # determine the location of the central joint and tip of the arm
         # joint = (self.a_l * cos(self.a) + self.o[0]), (self.a_l * sin(self.a) + self.o[1]), (self.a_l * sin(self.c) + self.o[2])
         # tip = (self.b_l * cos(self.b) + joint[0]), (self.b_l * sin(self.b) + joint[1]), (self.b_l * sin(self.c) + joint[2])
-        joint = (self.a_l * sin(self.c) + self.o[0] + self.t[0]), (self.a_l * cos(self.a) + self.o[1] + self.t[1]), (self.a_l * sin(self.a) + self.o[2] + self.t[2])
+        joint = (self.a_l * sin(self.c) + self.o[0]), (self.a_l * cos(self.a) + self.o[1]), (self.a_l * sin(self.a) + self.o[2])
         tip = (self.b_l * sin(self.c) + joint[0]), (self.b_l * cos(self.b) + joint[1]), (self.b_l * sin(self.b) + joint[2])
         arm1, arm2, joint_a, joint_b = arm
-        joint_a.set_xdata([self.o[0] + self.t[0]])
-        joint_a.set_ydata([self.o[1] + self.t[1]])
-        joint_a.set_3d_properties([self.o[2] + self.t[2]])
+        joint_a.set_xdata([self.o[0]])
+        joint_a.set_ydata([self.o[1]])
+        joint_a.set_3d_properties([self.o[2]])
         joint_b.set_xdata([joint[0]])
         joint_b.set_ydata([joint[1]])
         joint_b.set_3d_properties([joint[2]])
-        arm1.set_xdata((self.o[0] + self.t[0], joint[0]))
-        arm1.set_ydata((self.o[1] + self.t[1], joint[1]))
-        arm1.set_3d_properties((self.o[2] + self.t[2], joint[2]))
+        arm1.set_xdata((self.o[0], joint[0]))
+        arm1.set_ydata((self.o[1], joint[1]))
+        arm1.set_3d_properties((self.o[2], joint[2]))
         arm2.set_xdata((joint[0], tip[0]))
         arm2.set_ydata((joint[1], tip[1]))
         arm2.set_3d_properties((joint[2], tip[2]))
