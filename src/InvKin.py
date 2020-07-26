@@ -97,7 +97,7 @@ class Arm3D:
         self.a, self.b, self.c = angles
         self.prev_gr = [0, 0, 0]
 
-    # returns the location of the leg's tip
+    # helper, returns the location of the leg's tip
     def get_tip(self) -> tuple:
         tip = (self.a_l * sin(self.c) + self.b_l * sin(self.c) + self.o[0]), \
               (self.a_l * cos(self.a) + self.b_l * cos(self.b) + self.o[1]), \
@@ -117,7 +117,9 @@ class Arm3D:
 
         return distance
 
-    # find the change in angle that brings the tip of the arm closer to the destination
+    # Find the change in angle that brings the tip of the arm closer
+    # to the destination by comparing small changes to each angle
+    # in either direction
     def find_angle(self, angle, theta=1.0) -> list:
         theta = radians(theta)
         gradients = [self.calc_dist(theta, 0, 0) - self.calc_dist(-theta, 0, 0),
@@ -158,8 +160,9 @@ class Arm3D:
 
     # animate graph objects
     def update(self, arm):
-        self.a, self.b, self.c = self.find_angle([self.a, self.b, self.c], 0.2 / ((self.a_l + self.b_l) / 2) if self.distance < 0.5
-                                                 else 2 / ((self.a_l + self.b_l) / 2))  # slow down if the tip is close
+        # determine speed angle should change at depending on distance and arm length
+        speed =  0.2 / ((self.a_l + self.b_l) / 2) if self.distance < 0.5 else 2 / ((self.a_l + self.b_l) / 2)
+        self.a, self.b, self.c = self.find_angle([self.a, self.b, self.c], speed)
         self.distance = self.calc_dist()
 
         # determine the location of the central joint and tip of the arm
@@ -167,6 +170,7 @@ class Arm3D:
         # tip = (self.b_l * cos(self.b) + joint[0]), (self.b_l * sin(self.b) + joint[1]), (self.b_l * sin(self.c) + joint[2])
         joint = (self.a_l * sin(self.c) + self.o[0]), (self.a_l * cos(self.a) + self.o[1]), (self.a_l * sin(self.a) + self.o[2])
         tip = (self.b_l * sin(self.c) + joint[0]), (self.b_l * cos(self.b) + joint[1]), (self.b_l * sin(self.b) + joint[2])
+
         arm1, arm2, joint_a, joint_b = arm
         joint_a.set_xdata([self.o[0]])
         joint_a.set_ydata([self.o[1]])

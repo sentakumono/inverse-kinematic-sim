@@ -36,13 +36,14 @@ class Body():
         for i in range(len(self.corners)):
             self.corners[i] = (self.corners[i][0] + delta[0], self.corners[i][1] + delta[1], self.corners[i][2] + delta[2])
 
-    #rotate the body around the 3 axes
+    # rotate the body around the 3 axes
     def rotate(self, rot):
         # temporary limit, but may keep it as it seems physically reasonable
         for i in range(len(rot)):
             if self.rotation[i] >= pi / 4:
                 rot[i] = 0
         x, y, z = rot
+        # 3D rotation matrix for 3x1 corner point
         r_1, r_2, r_3 = np.array([[1, 0, 0], [0, cos(x), -sin(x)], [0, sin(x), cos(x)]]), \
                         np.array([[cos(y), 0, sin(y)], [0, 1, 0], [-sin(y), 0, cos(y)]]), \
                         np.array([[cos(z), -sin(z), 0], [sin(z), cos(z), 0], [0, 0, 1]])
