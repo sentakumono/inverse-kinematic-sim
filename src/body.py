@@ -28,10 +28,10 @@ class Body():
     #TODO: Transformations need limits so it doesn't crumple
 
     # translate the body by a given offset
-    def translate(self, delta):
+    def translate(self, delta, lim=True):
         # temporary limit, need to make it based off of leg range
         for i in range(len(delta)):
-            if delta[i] > 2:
+            if delta[i] > 2 and lim:
                 delta[i] = 0
         for i in range(len(self.corners)):
             self.corners[i] = (self.corners[i][0] + delta[0], self.corners[i][1] + delta[1], self.corners[i][2] + delta[2])
@@ -47,12 +47,21 @@ class Body():
         r_1, r_2, r_3 = np.array([[1, 0, 0], [0, cos(x), -sin(x)], [0, sin(x), cos(x)]]), \
                         np.array([[cos(y), 0, sin(y)], [0, 1, 0], [-sin(y), 0, cos(y)]]), \
                         np.array([[cos(z), -sin(z), 0], [sin(z), cos(z), 0], [0, 0, 1]])
+
         r = np.matmul(r_1, np.matmul(r_2, r_3))
 
         self.rotation = [a + b for a, b in zip([x, y, z], self.rotation)]
         # self.corners = np.matmul(self.corners, r)
         for i in range(len(self.corners)):
             self.corners[i] = np.matmul(self.corners[i], r)
+
+    # translate point to origin then apply rotation
+    # kinda scuffed ngl
+    def rotate_about_point(self, rot, point):
+        self.translate([-a for a in point], False)
+        self.rotate(rot)
+        self.translate(point, False)
+
 
     # initialize graph objects
     def graph(self, sp):

@@ -1,65 +1,43 @@
-# A test for a 2D kinematic arm. Its destination is randomized within its range so you can watch it struggle endlessly.
-
+# The graph for the 3D quadraped bot
 from matplotlib.pyplot import *
+from mpl_toolkits import mplot3d as mp
 from math import *
-from random import random
 from numpy import linspace
-from InvKin import Arm
+from body import Body
 
 
-fig = figure(figsize=(10, 10))
-sp = fig.add_subplot(111)
-sp.set_aspect('equal')
+if __name__ == "__main__":
+    fig = figure(figsize=(9, 7))
+    sp = mp.Axes3D(fig)
 
-sp.plot((-15, 15), (-10, 10), c="#FFFFFF")
-
-
-def set_destination():
-    return int(20 * random() - 10), int(20 * random() - 10)
-
-
-# destination = set_destination()
-destination = (-5, -5)
-dest_point, = sp.plot((-15, 15), [destination[1], destination[1]], marker="o", markersize=3)
-
-arm_coord = 5
-arm_L = sqrt(2 * (arm_coord ** 2))
-
-arm_calc = Arm(arm_L, arm_L, destination)
-# arm_calc_2 = Arm(arm_L, arm_L, (5, -5), (5, 5))
+    sp.plot((-9, 9), (0, 0), (0, 0), c="#999999")
+    sp.plot((0, 0), (-9, 9), (0, 0), c="#999999")
+    sp.plot((0, 0), (0, 0), (0, 15), c="#999999")
+    sp.text(9, 0, 0, 'x'), sp.text(0, 9, 0, "y"), sp.text(0, 0, 15, "z")
 
 
-arm1 = arm_calc.graph(sp)
-# arm2 = arm_calc_2.graph(sp)
-
-# body, =   sp.plot(arm_calc.o, arm_calc_2.o)
-
-tip = (0, 0)
-distance = 1
-# distance_2 = 1
-
-while True:
-    if distance < 0.2:
-    # if (distance < 0.2) or (distance_2 < 0.2):
-        destination = set_destination()
-        # destination = (destination[0] + 0.1 if destination[0] < 5 else -1 * 0.5, -5)
-        dest_point.set_xdata([destination[0]])
-        dest_point.set_ydata([destination[1]])
-        arm_calc.dest = destination
-        # arm_calc_2.dest = destination
-        #
-        # delta = 0.05 if arm_calc.o[0] < 2 else 0
-        # arm_calc.o = (arm_calc.o[0] + delta, arm_calc.o[1])
-        # arm_calc_2.o = (arm_calc_2.o[0] + delta, arm_calc_2.o[1])
-        # body.set_xdata([arm_calc.o[0], arm_calc_2.o[0]])
-        # body.set_ydata([arm_calc.o[1], arm_calc_2.o[1]])
+    body = Body(5, 8, 5)
+    body.graph(sp)
 
 
+    # translate corners to go in a circle in each plane
+    del_x, del_y, del_z = [], [], []
+    for x in np.linspace(0, 10*pi, 1000):
+        del_x += [cos(x) / 30]
+        del_y += [sin(x) / 30]
+        del_z += [-sin(x) / 30]
 
-    distance = arm_calc.update(distance, arm1[0], arm1[1], arm1[2])
-    # distance_2 = arm_calc_2.update(distance_2, arm2[0], arm2[1], arm2[2])
+    x, y, z = iter(del_x), iter(del_y), iter(del_z)
 
-    draw()
-    pause(0.01)
+    pan, roll = 0, 0
+    while True:
+        # angles.set_text("\U000003B1: "+ str(int(degrees(arm_calc.a))) + ", \U000003B2: " + str(int(degrees(arm_calc.b))) + ", \U000003B3: " + str(int(degrees(arm_calc.c))))
+        body.update(sp)
+        body.translate([next(x), next(y), next(z)])
+        # body.rotate([0.005, 0.005, 0.005])
+        # pan, roll = sp.elev, sp.azim
+        body.rotate_about_point([0.05, 0, 0], [0, 0, body.h])
 
-show()
+        draw()
+        pause(0.01)
+
