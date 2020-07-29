@@ -31,7 +31,7 @@ class Body():
     def translate(self, delta):
         # temporary limit, need to make it based off of leg range
         for i in range(len(delta)):
-            if delta[i] > 8:
+            if delta[i] > 2:
                 delta[i] = 0
         for i in range(len(self.corners)):
             self.corners[i] = (self.corners[i][0] + delta[0], self.corners[i][1] + delta[1], self.corners[i][2] + delta[2])
@@ -40,7 +40,7 @@ class Body():
     def rotate(self, rot):
         # temporary limit, but may keep it as it seems physically reasonable
         for i in range(len(rot)):
-            if self.rotation[i] >= pi / 4:
+            if self.rotation[i] >= pi / 6:
                 rot[i] = 0
         x, y, z = rot
         # 3D rotation matrix for 3x1 corner point
@@ -58,7 +58,7 @@ class Body():
     def graph(self, sp):
         for i in range(len(self.legs)):
             self.leg_graphs[i] = self.legs[i].graph(sp)
-        body_graph = sp.add_collection3d(mp.art3d.Poly3DCollection([self.corners]), zs=self.corners[0][1])
+        body_graph = sp.add_collection3d(mp.art3d.Poly3DCollection([self.corners]))
         return body_graph
 
     # animate graph objects

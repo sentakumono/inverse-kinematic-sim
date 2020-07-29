@@ -87,7 +87,7 @@ class Arm:
 
 # model for a 3D kinematic arm with 1 DOF at its centre joint and 2 at its base
 class Arm3D:
-    def __init__(self, a_len, b_len, dest, origin=(0, 0, 0), angles=(pi, 0, 0)):
+    def __init__(self, a_len, b_len, dest, origin=(0, 0, 0), angles=(-3/4 * pi,-pi/4, 0)):
         self.a_l = a_len
         self.b_l = b_len
         self.dest = dest
