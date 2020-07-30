@@ -111,7 +111,6 @@ if __name__ == "__main__":
     arm_calc = Arm(arm_L, arm_L, destination)
     # arm_calc_2 = Arm(arm_L, arm_L, (5, -5), (5, 5))
 
-
     arm1 = arm_calc.graph(sp)
     # arm2 = arm_calc_2.graph(sp)
 
@@ -123,7 +122,7 @@ if __name__ == "__main__":
 
     while True:
         if distance < 0.2:
-        # if (distance < 0.2) or (distance_2 < 0.2):
+            # if (distance < 0.2) or (distance_2 < 0.2):
             destination = set_destination()
             # destination = (destination[0] + 0.1 if destination[0] < 5 else -1 * 0.5, -5)
             dest_point.set_xdata([destination[0]])
@@ -136,8 +135,6 @@ if __name__ == "__main__":
             # arm_calc_2.o = (arm_calc_2.o[0] + delta, arm_calc_2.o[1])
             # body.set_xdata([arm_calc.o[0], arm_calc_2.o[0]])
             # body.set_ydata([arm_calc.o[1], arm_calc_2.o[1]])
-
-
 
         distance = arm_calc.update(distance, arm1[0], arm1[1], arm1[2])
         # distance_2 = arm_calc_2.update(distance_2, arm2[0], arm2[1], arm2[2])

@@ -4,7 +4,7 @@ import numpy as np
 
 # model for a 3D kinematic arm with 1 DOF at its centre joint and 2 at its base
 class Arm3D:
-    def __init__(self, a_len, b_len, dest, origin=(0, 0, 0), angles=(-3/4 * pi,-pi/4, 0)):
+    def __init__(self, a_len, b_len, dest, origin=(0, 0, 0), angles=(-3 / 4 * pi, -pi / 4, 0)):
         self.a_l = a_len
         self.b_l = b_len
         self.dest = dest
@@ -54,9 +54,9 @@ class Arm3D:
         #     angle[i] -= self.speed[i]
 
         # real python moment
-        for i in range(len(gradients)):
+        for i, grad in enumerate(gradients):
             # if the gradients are opposite signs (past destination), slow it down towards the opposite direction & reset
-            angle[i] -= gradients[i] * (-1 if np.sign(gradients[i]) != np.sign(self.prev_gr[i]) and not isclose(gradients[i], self.prev_gr[i]) else 1)
+            angle[i] -= grad * (-1 if np.sign(grad) != np.sign(self.prev_gr[i]) and not isclose(grad, self.prev_gr[i]) else 1)
 
         self.prev_gr = gradients
         return angle
@@ -74,11 +74,10 @@ class Arm3D:
 
         return [arm1, arm2, joint_a, joint_b]
 
-
     # animate graph objects
     def update(self, arm):
         # determine speed angle should change at depending on distance and arm length
-        speed =  0.2 / ((self.a_l + self.b_l) / 2) if self.distance < 0.5 else 2 / ((self.a_l + self.b_l) / 2)
+        speed = 0.2 / ((self.a_l + self.b_l) / 2) if self.distance < 0.5 else 2 / ((self.a_l + self.b_l) / 2)
         self._a, self._b, self.c = self.find_angle([self.a, self.b, self.c], speed)
         self.distance = self.calc_dist()
 
@@ -105,6 +104,7 @@ class Arm3D:
     @property
     def _a(self):
         return self._a
+
     @_a.setter
     def _a(self, angle):
         if angle > radians(-270):

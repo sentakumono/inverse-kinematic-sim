@@ -2,7 +2,6 @@ from PyQt5.Qt3DCore import QEntity, QTransform
 from PyQt5.Qt3DExtras import QCuboidMesh, Qt3DWindow, QPhongMaterial, QTorusMesh, QOrbitCameraController
 from PyQt5.Qt3DRender import QCamera
 
-
 import sys
 from PyQt5.QtWidgets import QApplication
 from PyQt5.QtGui import QVector3D, QColor
@@ -94,6 +93,7 @@ class Control():
         view.show()
         # fig.show()
         app.exec_()
+
 
 if __name__ == "__main__":
     # app = QApplication(sys.argv)

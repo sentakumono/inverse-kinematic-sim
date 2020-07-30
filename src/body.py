@@ -23,9 +23,9 @@ class Body():
                      ]
         self.leg_graphs = [[]] * 4
         self.leg_dist = [1] * 4
-        self.rotation = [0]*3
+        self.rotation = [0] * 3
 
-    #TODO: Transformations need limits so it doesn't crumple
+    # TODO: Transformations need limits so it doesn't crumple
 
     # translate the body by a given offset
     def translate(self, delta, lim=True):
@@ -33,8 +33,8 @@ class Body():
         for i in range(len(delta)):
             if delta[i] > 2 and lim:
                 delta[i] = 0
-        for i in range(len(self.corners)):
-            self.corners[i] = (self.corners[i][0] + delta[0], self.corners[i][1] + delta[1], self.corners[i][2] + delta[2])
+        for i, corner in enumerate(self.corners):
+            self.corners[i] = (corner[0] + delta[0], corner[1] + delta[1], corner[2] + delta[2])
 
     # rotate the body around the 3 axes
     def rotate(self, rot):
@@ -52,8 +52,8 @@ class Body():
 
         self.rotation = [a + b for a, b in zip([x, y, z], self.rotation)]
         # self.corners = np.matmul(self.corners, r)
-        for i in range(len(self.corners)):
-            self.corners[i] = np.matmul(self.corners[i], r)
+        for i, e in enumerate(self.corners):
+            self.corners[i] = np.matmul(e, r)
 
     # translate point to origin then apply rotation
     # kinda scuffed ngl
@@ -62,18 +62,17 @@ class Body():
         self.rotate(rot)
         self.translate(point, False)
 
-
     # initialize graph objects
     def graph(self, sp):
-        for i in range(len(self.legs)):
-            self.leg_graphs[i] = self.legs[i].graph(sp)
+        for i, leg in enumerate(self.legs):
+            self.leg_graphs[i] = leg.graph(sp)
         body_graph = sp.add_collection3d(mp.art3d.Poly3DCollection([self.corners]))
         return body_graph
 
     # animate graph objects
     def update(self, sp):
-        for i in range(len(self.legs)):
-            self.legs[i].update(self.leg_graphs[i])
+        for i, leg in enumerate(self.legs):
+            leg.update(self.leg_graphs[i])
             # self.legs[i].o = self.corners[i]
         sp.collections.pop()
         sp.add_collection3d(mp.art3d.Poly3DCollection([self.corners]), zs=self.corners[0][0])
